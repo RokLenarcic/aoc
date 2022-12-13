@@ -1,0 +1,28 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        medley/medley {:mvn/version "1.4.0"}
+        buddy/buddy-core {:mvn/version "1.10.413"}
+        ubergraph/ubergraph {:mvn/version "0.8.2"}
+        org.clojure/data.json {:mvn/version "2.4.0"}
+        criterium/criterium {:mvn/version "0.4.6"}
+        instaparse/instaparse {:mvn/version "1.4.12"}
+        org.flatland/ordered {:mvn/version "1.15.11"}
+        org.clojars.roklenarcic/memento {:mvn/version "1.1.49"}
+        org.clojure/math.combinatorics {:mvn/version "0.2.0"}
+        org.clojars.roklenarcic/cljc-shuffle {:mvn/version "1.0.1"}
+        com.rpl/specter {:mvn/version "1.1.4"}}
+ :aliases
+ {:run-m {:main-opts ["-m" "aoc.aoc2022"]}
+  :run-x {:ns-default aoc.aoc2022
+          :exec-fn greet
+          :exec-args {:name "Clojure"}}
+  :build {:deps {io.github.seancorfield/build-clj
+                 {:git/tag "v0.8.2" :git/sha "0ffdb4c"
+                  ;; since we're building an app uberjar, we do not
+                  ;; need deps-deploy for clojars.org deployment:
+                  :deps/root "slim"}}
+          :ns-default build}
+  :test {:extra-paths ["test"]
+         :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
+                      io.github.cognitect-labs/test-runner
+                      {:git/tag "v0.5.0" :git/sha "48c3c67"}}}}}
