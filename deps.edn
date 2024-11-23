@@ -1,11 +1,13 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
         medley/medley {:mvn/version "1.4.0"}
         buddy/buddy-core {:mvn/version "1.10.413"}
         ubergraph/ubergraph {:mvn/version "0.8.2"}
         org.clojure/data.json {:mvn/version "2.4.0"}
         criterium/criterium {:mvn/version "0.4.6"}
         instaparse/instaparse {:mvn/version "1.4.12"}
+        com.microsoft/z3 {:mvn/version "4.10.1"}
+        com.dean/interval-tree {:mvn/version "0.1.2"}
         org.flatland/ordered {:mvn/version "1.15.11"}
         org.clojars.roklenarcic/memento {:mvn/version "1.1.49"}
         org.clojure/math.combinatorics {:mvn/version "0.2.0"}

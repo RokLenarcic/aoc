@@ -3,17 +3,23 @@
     [aoc.chars :refer [char-square]]
     [clojure.walk :as walk]
     [medley.core :as m]
-    [ubergraph.core :as u]))
+    [ubergraph.core :as u])
+  (:import (java.util LinkedList)))
 
 (defn size* [rect-array]
   [(count rect-array) (count (rect-array 0))])
 
 (defn rot
-  "Rotates coordinates 90 deg, p is [row col]"
-  [p dir]
-  (case dir
-    (:R \R) [(p 1) (- (p 0))]
-    (:L \L) [(- (p 1)) (p 0)]))
+  "Rotates coordinates 90 deg, p is [row col], if max-row and max-col are provided,
+  it will move the result to 0,0 -> ... space"
+  ([p dir]
+   (case dir
+     (:R \R) [(p 1) (- (p 0))]
+     (:L \L) [(- (p 1)) (p 0)]))
+  ([p dir max-row max-col]
+   (case dir
+     (:R \R) [(p 1) (- max-row (p 0))]
+     (:L \L) [(- max-col (p 1)) (p 0)])))
 
 (defn rot3
   "Clockwise"
@@ -207,14 +213,19 @@
   "Move map coordinates so they begin at 0,0"
   [m]
   (let [[mins] (bounds (keys m))]
-    (update-keys m #(p-sum % (map - mins)))))
+    (update-keys m #(p-sum % (mapv - mins)))))
+
+(defn rot-map
+  "Rotate keys that are coordinates in a map, recentering"
+  ([m dir] (let [[_ maxes] (bounds (keys m))] (rot-map m maxes dir)))
+  ([m [max-row max-col] dir] (update-keys m #(rot % dir max-row max-col))))
 
 (defn rotated-and-mirrored
   "Returns all rotations and mirrored rotations of m."
   [m]
   (let [mirrored (update-keys m #(update % 0 -))]
-    (concat (take 4 (iterate (fn [m] (re-center (update-keys m #(rot % :R)))) m))
-            (take 4 (iterate (fn [m] (re-center (update-keys m #(rot % :R)))) (re-center mirrored))))))
+    (concat (take 4 (iterate #(rot-map % :R) m))
+            (take 4 (iterate #(rot-map % :R) (re-center mirrored))))))
 
 (defn array->graph
   [arr]
@@ -248,3 +259,47 @@
 
 (defn invest-years [per-month apr years]
   (long (nth (simulate-investment per-month apr) (* years 12))))
+
+(defn flood-fill
+  "Fill the hashmap with a value. edge? should return true if point is
+  on a boundary. Value fn should return value for coordinates."
+  ([edge? start-pos value]
+   (flood-fill edge? start-pos (constantly value) dirs Long/MAX_VALUE))
+  ([edge? start-pos value-fn dirs max-points]
+   (let [q (doto (LinkedList.) (.add start-pos))]
+     (loop [ret {start-pos (value-fn start-pos)}
+            pos (.poll q)]
+       (cond (< max-points (count ret)) nil
+             pos (recur (reduce (fn [ret dir]
+                                  (let [new-p (p-sum dir pos)]
+                                    (if (or (ret new-p) (edge? new-p))
+                                      ret
+                                      (do (.offer q new-p)
+                                          (assoc ret new-p (value-fn new-p)))))) ret dirs)
+                        (.poll q))
+             :else ret)))))
+
+(defn corners->edge-points
+  "Convert corners to edge points. If closed-loop? then edge points are generated
+  from last to first edge point."
+  [corners closed-loop?]
+  (let [f (first corners)
+        l (last corners)]
+    (reduce (fn [ret corner]
+              (let [last-point (peek ret)
+                    dir (mapv #(Long/signum (- %2 %1)) last-point corner)]
+                (into ret
+                      (m/take-upto #(= corner %))
+                      (next (iterate #(p-sum % dir) last-point)))))
+            [f]
+            (if (and closed-loop? (not= f l))
+              (concat (rest corners) [f])
+              (rest corners)))))
+
+(defn spans->corners
+  "Convert maps {:dir ... :cnt ...} into corners."
+  [maps start]
+  (reductions (fn [p {:keys [dir cnt]}]
+                (p-sum p (mapv #(* cnt %) dir)))
+              start
+              maps))

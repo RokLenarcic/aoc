@@ -63,7 +63,7 @@
   (let [ctx (init-state in)
         heights (map (comp max-height :state) (iterate drop-piece ctx))
         height-diff (map #(- %2 %1) heights (rest heights))
-        {:keys [length prefix prefix-vals cycle-vals]} (c/find-cycle height-diff 10 40)]
+        {:keys [length prefix prefix-vals cycle-vals]} (c/find-cycle-of-seq height-diff 10 40)]
     (let [n 1000000000000
           cycles (quot (- n prefix) length)
           last-bit (rem (- n prefix) length)]

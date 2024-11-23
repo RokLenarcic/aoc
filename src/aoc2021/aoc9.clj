@@ -1,7 +1,6 @@
 (ns aoc2021.aoc9
   (:require [aoc.arrays :as a]
             [aoc.inputs :as inputs]
-            [aoc.colls :as c]
             [ubergraph.core :as u]
             [ubergraph.alg :as alg]))
 
